@@ -10,7 +10,7 @@ import { z } from "zod";
 
 const checkpointer = new MemorySaver();
 
-// ============== EXISTING TOOLS ==============
+
 
 const tavilyTool = new TavilySearch({
     maxResults: 3,
@@ -32,13 +32,13 @@ const loggingWikiTool = new DynamicStructuredTool({
         query: z.string().describe("Topic to search"),
     }),
     func: async ({ query }) => {
-        console.log("📚 Wikipedia:", query);
+        console.log("wikipedia:", query);
         return await wikiTool.invoke(query);
     },
 });
 
 const loggingNewsTool = new DynamicStructuredTool({
-    name: "news_search",
+    name: "news search",
     description: "Search for recent news articles",
     schema: z.object({
         query: z.string().describe("News topic to search"),
@@ -56,7 +56,7 @@ const loggingNewsTool = new DynamicStructuredTool({
     },
 });
 
-// ============== NEW TOOL: WEATHER ==============
+
 
 const weatherTool = new DynamicStructuredTool({
     name: "weather",
@@ -65,9 +65,9 @@ const weatherTool = new DynamicStructuredTool({
         location: z.string().describe("City name"),
     }),
     func: async ({ location }) => {
-        console.log("🌤️ Weather:", location);
+        console.log("weather:", location);
         try {
-            // First, get coordinates from city name
+           
             const geoResponse = await fetch(
                 `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1&language=en&format=json`
             );
@@ -96,7 +96,6 @@ const weatherTool = new DynamicStructuredTool({
     }
 });
 
-// ============== NEW TOOL: CURRENCY CONVERSION ==============
 
 const currencyTool = new DynamicStructuredTool({
     name: "currency_conversion",
@@ -107,7 +106,7 @@ const currencyTool = new DynamicStructuredTool({
         to_currency: z.string().describe("Target currency code (e.g., EUR, GBP)"),
     }),
     func: async ({ amount, from_currency, to_currency }) => {
-        console.log(`💱 Currency: ${amount} ${from_currency} to ${to_currency}`);
+        console.log(`Currency: ${amount} ${from_currency} to ${to_currency}`);
         try {
             const response = await fetch(
                 `https://api.exchangerate-api.com/v4/latest/${from_currency.toUpperCase()}`
@@ -131,7 +130,7 @@ const currencyTool = new DynamicStructuredTool({
     }
 });
 
-// ============== NEW TOOL: COUNTRY INFO ==============
+
 
 const countryTool = new DynamicStructuredTool({
     name: "country_info",
@@ -164,12 +163,12 @@ const countryTool = new DynamicStructuredTool({
     }
 });
 
-// ============== ALL TOOLS ==============
+
 
 const tools = [tavilyTool, loggingWikiTool, loggingNewsTool, weatherTool, currencyTool, countryTool];
 const toolNode = new ToolNode(tools);
 
-// ============== LLM ==============
+
 
 const llm = new ChatGroq({
   model: "llama-3.3-70b-versatile",
@@ -178,7 +177,7 @@ const llm = new ChatGroq({
   apiKey: process.env.GROQ_API_KEY,
 }).bindTools(tools);
 
-// ============== WORKFLOW FUNCTIONS ==============
+
 
 async function callModel(state: any) {
   const response = await llm.invoke(state.messages);
@@ -193,7 +192,7 @@ function shouldContinue(state: any) {
     return '__end__';
 }
 
-// ============== WORKFLOW ==============
+
 
 const workflow = new StateGraph(MessagesAnnotation)
   .addNode("agent", callModel)
@@ -207,7 +206,7 @@ const workflow = new StateGraph(MessagesAnnotation)
 
 const app = workflow.compile({ checkpointer });
 
-// ============== API ROUTE ==============
+
 
 export async function POST(request: NextRequest) {
   try {
@@ -221,9 +220,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('🔄 Processing:', message || 'Document analysis');
+    console.log('Processing:', message || 'Document analysis');
 
-    // Build final message
+   
     let finalMessage = message || '';
     if (documentContent) {
       finalMessage = `I've uploaded a document. Here's my query: ${message || 'Please summarize this document'}
@@ -240,7 +239,7 @@ ${documentContent.substring(0, 3000)}`;
 
     const lastMessage = finalState.messages[finalState.messages.length - 1];
     
-    console.log('✅ Response generated');
+    console.log('response generated');
 
     return NextResponse.json({
       response: lastMessage.content,
@@ -248,7 +247,7 @@ ${documentContent.substring(0, 3000)}`;
     });
 
   } catch (error: any) {
-    console.error('❌ Error:', error);
+    console.error('error:', error);
     return NextResponse.json(
       { 
         error: 'Failed to process message',

@@ -1,7 +1,10 @@
 'use client';
 
+import { metadata } from './metadata';
+
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Paperclip, X, Bot, User } from 'lucide-react';
+import { Send, Paperclip, X, Bot,BotMessageSquare, User } from 'lucide-react';
+import { uploadPDFForOCR } from '../lib/pdf';
 
 interface Message {
   id: string;
@@ -59,7 +62,7 @@ const MessageBubble = ({ message }: { message: Message }) => {
             : 'bg-gray-900'
         }`}>
           {isBot ? (
-            <Bot className="w-10 h-10 text-white" />
+            <BotMessageSquare className="w-10 h-10 text-white" />
           ) : (
             <User className="w-5 h-5 text-white" />
           )}
@@ -105,8 +108,8 @@ const MessageBubble = ({ message }: { message: Message }) => {
 const TypingIndicator = () => (
   <div className="flex gap-3 px-4 py-3">
     <div className="flex-shrink-0 pt-1">
-      <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
-        <Bot className="w-5 h-5 text-white" />
+      <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center">
+        <BotMessageSquare className="w-5 h-5 text-white" />
       </div>
     </div>
     <div className="flex-1">
@@ -170,7 +173,8 @@ export default function ChatPage() {
     setExtracting(true);
     
     try {
-      const text = await extractPDFText(pdfFiles[0]);
+      const text = await uploadPDFForOCR(pdfFiles[0]);
+      console.log(text);
       setPdfContent(text);
       setUploadedFiles([pdfFiles[0]]);
       
@@ -257,7 +261,7 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-screen bg-black text-white">
-      {/* Header - X.com Style */}
+     
       <header className="sticky top-0 z-10 bg-black/80 backdrop-blur-md border-b border-gray-800">
         <div className="px-4 py-3">
           <div className="flex items-center gap-3">
@@ -265,14 +269,14 @@ export default function ChatPage() {
               <Bot className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-[15px] font-bold leading-tight">JARVIS</h1>
-              <p className="text-[13px] text-gray-500">AI Assistant</p>
+              <h1 className="text-[15px] font-bold leading-tight">JARVIS 0.5</h1>
+              <p className="text-[13px] text-gray-500">AI Assistant Chatbot</p>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Messages Area - X.com Style Feed */}
+     
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-[600px] mx-auto">
           {messages.map(msg => (
@@ -283,10 +287,10 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* Input Area - X.com Style */}
+     
       <div className="border-t border-gray-800 bg-black">
         <div className="max-w-[600px] mx-auto">
-          {/* File Preview */}
+          
           {uploadedFiles.length > 0 && (
             <div className="px-4 pt-3">
               <div className="flex gap-2 flex-wrap">
@@ -308,17 +312,17 @@ export default function ChatPage() {
             </div>
           )}
           
-          {/* Extracting Status */}
+          
           {extracting && (
             <div className="px-4 pt-3 text-sm text-gray-500">
-              🔄 Extracting PDF text...
+              🔄 uploading docum...
             </div>
           )}
           
-          {/* Input Row */}
+          
           <div className="p-4">
             <div className="flex items-end gap-2 bg-gray-900 border border-gray-800 rounded-full px-4 py-2 focus-within:border-blue-600 transition">
-              {/* Attach Button */}
+            
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={extracting}
@@ -348,7 +352,7 @@ export default function ChatPage() {
                 className="flex-1 bg-transparent text-white placeholder-gray-600 outline-none resize-none max-h-32 py-2 text-[15px]"
               />
 
-              {/* Send Button */}
+            
               <button
                 onClick={handleSendMessage}
                 disabled={(!inputText.trim() && uploadedFiles.length === 0) || isTyping}
